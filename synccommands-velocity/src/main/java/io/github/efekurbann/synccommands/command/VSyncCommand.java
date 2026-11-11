@@ -28,7 +28,7 @@ public class VSyncCommand implements SimpleCommand {
 
         if (!invocation.source().hasPermission("synccommands.proxy.admin")) {
             sender.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(
-                    plugin.getConfig().getRoot().getNode("no-permission").getString()
+                    plugin.getConfig().getRoot().node("no-permission").getString()
             ).decoration(TextDecoration.ITALIC, false));
             return;
         }

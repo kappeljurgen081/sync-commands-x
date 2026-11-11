@@ -2,8 +2,8 @@ package io.github.efekurbann.synccommands.config;
 
 import com.google.common.io.ByteStreams;
 import io.github.efekurbann.synccommands.SyncCommandsVelocity;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,14 +14,14 @@ import java.nio.file.Path;
 
 public class Config {
 
-    private final YAMLConfigurationLoader loader;
+    private final YamlConfigurationLoader loader;
     private final SyncCommandsVelocity plugin;
 
-    private ConfigurationNode root;
+    private CommentedConfigurationNode root;
 
     public Config(SyncCommandsVelocity plugin, Path path) {
         this.plugin = plugin;
-        this.loader = YAMLConfigurationLoader.builder().setPath(path).build();
+        this.loader = YamlConfigurationLoader.builder().path(path).build();
     }
 
     public void create() {
@@ -56,7 +56,7 @@ public class Config {
         }
     }
 
-    public ConfigurationNode getRoot() {
+    public CommentedConfigurationNode getRoot() {
         return root;
     }
 }

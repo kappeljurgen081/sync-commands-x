@@ -2,7 +2,6 @@ package io.github.efekurbann.synccommands;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.event.Subscribe;
@@ -28,8 +27,8 @@ import io.github.efekurbann.synccommands.objects.server.Server;
 import io.github.efekurbann.synccommands.scheduler.Scheduler;
 import io.github.efekurbann.synccommands.scheduler.impl.VelocityScheduler;
 import io.github.efekurbann.synccommands.util.UpdateChecker;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
 import org.bstats.velocity.Metrics;
 
 import java.nio.file.Path;
@@ -86,7 +85,7 @@ public class SyncCommandsVelocity {
 
         ConnectionType type;
         try {
-            type = ConnectionType.valueOf(this.getConfig().getRoot().getNode("connection", "type")
+            type = ConnectionType.valueOf(this.getConfig().getRoot().node("connection", "type")
                     .getString().toUpperCase(Locale.ENGLISH));
         } catch (IllegalArgumentException exception) {
             this.getLogger().info("Invalid connection type detected! Valid types: Redis, RabbitMQ, Socket");
@@ -120,20 +119,20 @@ public class SyncCommandsVelocity {
     private boolean connect(ConnectionType type) {
         if (type != ConnectionType.RABBITMQ) {
             this.server = new Server(
-                    this.getConfig().getRoot().getNode("serverName").getString(),
-                    this.getConfig().getRoot().getNode("connection", "host").getString(),
-                    this.getConfig().getRoot().getNode("connection", "port").getInt(),
-                    this.getConfig().getRoot().getNode("connection", "password").getString(),
-                    this.getConfig().getRoot().getNode("connection", "secure").getBoolean());
+                    this.getConfig().getRoot().node("serverName").getString(),
+                    this.getConfig().getRoot().node("connection", "host").getString(),
+                    this.getConfig().getRoot().node("connection", "port").getInt(),
+                    this.getConfig().getRoot().node("connection", "password").getString(),
+                    this.getConfig().getRoot().node("connection", "secure").getBoolean());
         } else {
             this.server = new MQServer(
-                    this.getConfig().getRoot().getNode("serverName").getString(),
-                    this.getConfig().getRoot().getNode("connection", "host").getString(),
-                    this.getConfig().getRoot().getNode("connection", "port").getInt(),
-                    this.getConfig().getRoot().getNode("connection", "password").getString(),
-                    this.getConfig().getRoot().getNode("connection", "secure").getBoolean(),
-                    this.getConfig().getRoot().getNode("connection", "username").getString(),
-                    this.getConfig().getRoot().getNode("connection", "vhost").getString());
+                    this.getConfig().getRoot().node("serverName").getString(),
+                    this.getConfig().getRoot().node("connection", "host").getString(),
+                    this.getConfig().getRoot().node("connection", "port").getInt(),
+                    this.getConfig().getRoot().node("connection", "password").getString(),
+                    this.getConfig().getRoot().node("connection", "secure").getBoolean(),
+                    this.getConfig().getRoot().node("connection", "username").getString(),
+                    this.getConfig().getRoot().node("connection", "vhost").getString());
         }
 
         switch (type) {
@@ -175,24 +174,24 @@ public class SyncCommandsVelocity {
 
     private void setupServers(ConnectionType type) {
         for (Map.Entry<Object, ? extends ConfigurationNode> node :
-                this.getConfig().getRoot().getNode("servers").getChildrenMap().entrySet()) {
+                this.getConfig().getRoot().node("servers").childrenMap().entrySet()) {
             Server s;
             if (type != ConnectionType.RABBITMQ) {
                 s = new Server(
                         (String) node.getKey(),
-                        node.getValue().getNode("host").getString(),
-                        node.getValue().getNode("port").getInt(),
-                        node.getValue().getNode("password").getString(),
-                        node.getValue().getNode("secure").getBoolean());
+                        node.getValue().node("host").getString(),
+                        node.getValue().node("port").getInt(),
+                        node.getValue().node("password").getString(),
+                        node.getValue().node("secure").getBoolean());
             } else {
                 s = new MQServer(
                         (String) node.getKey(),
-                        node.getValue().getNode("host").getString(),
-                        node.getValue().getNode("port").getInt(),
-                        node.getValue().getNode("password").getString(),
-                        node.getValue().getNode("secure").getBoolean(),
-                        node.getValue().getNode("username").getString(),
-                        node.getValue().getNode("vhost").getString());
+                        node.getValue().node("host").getString(),
+                        node.getValue().node("port").getInt(),
+                        node.getValue().node("password").getString(),
+                        node.getValue().node("secure").getBoolean(),
+                        node.getValue().node("username").getString(),
+                        node.getValue().node("vhost").getString());
             }
             this.servers.put((String) node.getKey(), s);
         }
@@ -202,14 +201,14 @@ public class SyncCommandsVelocity {
 
     private void setupGroups() {
         for (Map.Entry<Object, ? extends ConfigurationNode> node :
-                this.getConfig().getRoot().getNode("groups").getChildrenMap().entrySet()) {
+                this.getConfig().getRoot().node("groups").childrenMap().entrySet()) {
             Set<Server> servers = new HashSet<>();
 
             try {
-                for (String s : node.getValue().getList(TypeToken.of(String.class))) {
+                for (String s : node.getValue().getList(String.class)) {
                     servers.add(this.servers.get(s));
                 }
-            } catch (ObjectMappingException e) {
+            } catch (SerializationException e) {
                 e.printStackTrace();
             }
 
